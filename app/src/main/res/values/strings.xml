@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_nombre">Quizzing App</string>
+    <string name="text_1">Howdy! Welcome to this quizzing app.</string>
+    <string name="name_hint">What is your name?</string>
+    <string name="button_1">Submit</string>
+    <string name="time">Time: 0</string>
+    <string name="score">Score: 0</string>
+    <string name="directions">Directions</string>
+    <string name="title_endScrn">Results</string>
+    <string name="back">Return</string>
+    <string name="results">Results</string>
+    <string name="text_2">nice job</string>
+    <string name="view_all_scores">View All Scores</string>
+    <string name="enter_email">Enter your email</string>
+    <string name="enter_password">Enter password</string>
+</resources>
