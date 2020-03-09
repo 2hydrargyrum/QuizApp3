@@ -27,7 +27,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
-
+//Lab06b: reads available vocab/question lists from database, prevents double clicking on buttons, forces person to type something before continuing, uploads score & name to database after game, score page now shows scores from all people with app
 public class MainActivity extends AppCompatActivity {
     DatabaseReference mDatabase;
     // Declare android elements
