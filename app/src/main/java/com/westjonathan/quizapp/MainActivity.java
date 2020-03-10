@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,6 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import java.util.Map;
 import java.util.Objects;
@@ -103,28 +105,30 @@ public class MainActivity extends AppCompatActivity {
         displayScore.setVisibility(View.INVISIBLE);
         // Randomize question order:
         shuffleArray(respuestas, preguntas);
-        //if returned-to from end screen:
-        Intent intent = getIntent();
-        String prev_name = sharedPreferences.getString("name", "");
+
+        Gson gson = new Gson();
+        DataStorage temp_dt = gson.fromJson(sharedPreferences.getString("name", "{'name':''}"),
+                DataStorage.class);
+        String prev_name = temp_dt.getName();
         String returnGreeting;
         if(!prev_name.equals("")){
             returnGreeting = "Welcome back"+ (" " + prev_name) + "! You can change your name if you want.";
             dispMessage.setText(returnGreeting);}
-//        if(intent.hasExtra("returning?")) {
-//            dispMessage.setText(returnGreeting);
-//        }
+//        if(intent.hasExtra("returning?")) { dispMessage.setText(returnGreeting); }
 //        readFromDatabase("unit8");// retrieve questions and answers from specified set
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // mis-clicking prevention, using threshold of 300 ms:
-                if (SystemClock.elapsedRealtime() - mLastClickTimeSubmit < 300){
+                if (SystemClock.elapsedRealtime() - mLastClickTimeSubmit < 300) {
                     return;
                 }
                 mLastClickTimeSubmit = SystemClock.elapsedRealtime();
 
                 currName = responseText.getText().toString().trim();
-                if(currName.equals("") && sharedPreferences.getString("name", "").equals("")) { // if user did not input name
+                Gson gson = new Gson();
+                DataStorage storedName = gson.fromJson(sharedPreferences.getString("name", "{'name':''}"), DataStorage.class);
+                if(currName.equals("") && storedName.getName().equals("")) { // if user did not input name
                     if (mainToast != null) // demand a name input
                         mainToast.cancel();
                     mainToast = Toast.makeText(MainActivity.this, "Please enter a name", Toast.LENGTH_SHORT);
@@ -132,15 +136,18 @@ public class MainActivity extends AppCompatActivity {
                 } else { // begin game
                     quizChoice.setVisibility(View.INVISIBLE); // prevent user from changing during game
                     if(currName.equals(""))
-                        currName = sharedPreferences.getString("name", "");
+                        currName = storedName.getName();
                     // Welcome message
                     if (mainToast != null)
                         mainToast.cancel();//eliminate previous toasts, if any remain
                     mainToast = Toast.makeText(MainActivity.this, "Welcome to the game " + currName + "!", Toast.LENGTH_SHORT);
                     mainToast.show();
-
+                    // Use GSON:
+                    DataStorage plyr = new DataStorage(currName);
+                    gson = new Gson();
+//                    System.out.println(gson.toJson(plyr));
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("name", currName);
+                    editor.putString("name", gson.toJson(plyr)); // store object with name
                     editor.apply();
                     dispMessage.setText(preguntas[0]);
                     dispTime.setVisibility(View.VISIBLE);
