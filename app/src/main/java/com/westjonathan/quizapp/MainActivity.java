@@ -2,9 +2,12 @@ package com.westjonathan.quizapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -27,7 +30,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
-//Lab06b: reads available vocab/question lists from database, prevents double clicking on buttons, forces person to type something before continuing, uploads score & name to database after game, score page now shows scores from all people with app
+
 public class MainActivity extends AppCompatActivity {
     DatabaseReference mDatabase;
     // Declare android elements
@@ -83,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final SharedPreferences sharedPreferences = getSharedPreferences("dataStorage", Context.MODE_PRIVATE);
+
         mDatabase = FirebaseDatabase.getInstance().getReference();
         //initialize elements
         quizChoice = findViewById(R.id.qcSpinner);//get the spinner from the xml
@@ -100,15 +105,18 @@ public class MainActivity extends AppCompatActivity {
         shuffleArray(respuestas, preguntas);
         //if returned-to from end screen:
         Intent intent = getIntent();
-        String returnGreeting = "Welcome back! Please reenter your name, or change it if you'd like.";
-        if(intent.hasExtra("returning?")) {
-            dispMessage.setText(returnGreeting);
-        }
+        String prev_name = sharedPreferences.getString("name", "");
+        String returnGreeting;
+        if(!prev_name.equals("")){
+            returnGreeting = "Welcome back"+ (" " + prev_name) + "! You can change your name if you want.";
+            dispMessage.setText(returnGreeting);}
+//        if(intent.hasExtra("returning?")) {
+//            dispMessage.setText(returnGreeting);
+//        }
 //        readFromDatabase("unit8");// retrieve questions and answers from specified set
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                quizChoice.setVisibility(View.INVISIBLE); // prevent user from changing during game
                 // mis-clicking prevention, using threshold of 300 ms:
                 if (SystemClock.elapsedRealtime() - mLastClickTimeSubmit < 300){
                     return;
@@ -116,17 +124,24 @@ public class MainActivity extends AppCompatActivity {
                 mLastClickTimeSubmit = SystemClock.elapsedRealtime();
 
                 currName = responseText.getText().toString().trim();
-                if(currName.equals("")) { // if user did not input name
+                if(currName.equals("") && sharedPreferences.getString("name", "").equals("")) { // if user did not input name
                     if (mainToast != null) // demand a name input
                         mainToast.cancel();
                     mainToast = Toast.makeText(MainActivity.this, "Please enter a name", Toast.LENGTH_SHORT);
                     mainToast.show();
                 } else { // begin game
+                    quizChoice.setVisibility(View.INVISIBLE); // prevent user from changing during game
+                    if(currName.equals(""))
+                        currName = sharedPreferences.getString("name", "");
                     // Welcome message
                     if (mainToast != null)
                         mainToast.cancel();//eliminate previous toasts, if any remain
                     mainToast = Toast.makeText(MainActivity.this, "Welcome to the game " + currName + "!", Toast.LENGTH_SHORT);
                     mainToast.show();
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("name", currName);
+                    editor.apply();
                     dispMessage.setText(preguntas[0]);
                     dispTime.setVisibility(View.VISIBLE);
                     displayScore.setVisibility(View.VISIBLE);
