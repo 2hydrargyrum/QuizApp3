@@ -1,7 +1,7 @@
 package com.westjonathan.quizapp;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+// Lab06d: Incorporated GSON into project to help store name data. The question and answer lists are still stored by the database. I also got fragments working in a separate app, which I shall incorporate into this one next.
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
