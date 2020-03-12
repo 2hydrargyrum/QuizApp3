@@ -1,7 +1,7 @@
 package com.westjonathan.quizapp;
 
 import androidx.appcompat.app.AppCompatActivity;
-// Lab06d: Incorporated GSON into project to help store name data. The question and answer lists are still stored by the database. I also got fragments working in a separate app, which I shall incorporate into this one next.
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -114,6 +114,12 @@ public class MainActivity extends AppCompatActivity {
         if(!prev_name.equals("")){
             returnGreeting = "Welcome back"+ (" " + prev_name) + "! You can change your name if you want.";
             dispMessage.setText(returnGreeting);}
+        else{  // first time playing
+            if (mainToast != null) // demand a name input
+                mainToast.cancel();
+            mainToast = Toast.makeText(MainActivity.this, "NOTE: Connect to non-school internet to interact with database", Toast.LENGTH_LONG);
+            mainToast.show();
+        }
 //        if(intent.hasExtra("returning?")) { dispMessage.setText(returnGreeting); }
 //        readFromDatabase("unit8");// retrieve questions and answers from specified set
         submitButton.setOnClickListener(new View.OnClickListener() {
